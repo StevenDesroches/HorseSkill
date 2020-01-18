@@ -1,0 +1,26 @@
+name: HorseSkill
+version: 1.0.0
+author: stecool
+main: com.github.StevenDesroches.HorseSkill.HorseSkill
+api-version: 1.12.2
+commands:
+  horse:
+    description: the basic horse command
+    usage: /horse [claim, unclaim, summon]
+permissions:
+  HorseSkill.commands.*:
+    description: Gives access to all the commands
+    default: false
+    children:
+      HorseSkill.commands.claim: true
+      HorseSkill.commands.unclaim: true
+      HorseSkill.commands.summon: true
+  HorseSkill.commands.claim:
+    description: Gives the claim command
+    default: false
+  HorseSkill.commands.unclaim:
+    description: Gives the unclaim command
+    default: false
+  HorseSkill.commands.summon:
+    description: Gives the summon command
+    default: false
