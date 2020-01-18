@@ -1,18 +1,14 @@
 package com.github.StevenDesroches.HorseSkill.datatype;
 
-import net.minecraft.server.v1_12_R1.EntityHorse;
-import net.minecraft.server.v1_12_R1.PathfinderGoalFloat;
-import net.minecraft.server.v1_12_R1.World;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class rpgHorse {
+public class RpgHorse {
 
     private UUID horseUUID;
     private double originalSpeed;
@@ -23,6 +19,9 @@ public class rpgHorse {
     private double originalJump;
     private Horse.Style originalStyle;
     private Horse.Color originalColor;
+    private boolean hasSaddle;
+    private boolean hasArmour;
+    private Material armourType;
 
     private UUID playerUUID;
 
@@ -34,7 +33,11 @@ public class rpgHorse {
     private double updatedJump;
 
 
-    public rpgHorse(UUID horseUUID, UUID playerUUID) {
+    public UUID getHorseUUID() {
+        return this.horseUUID;
+    }
+
+    public RpgHorse(UUID horseUUID, UUID playerUUID) {
         this.horseUUID = horseUUID;
         this.playerUUID = playerUUID;
 
@@ -61,13 +64,13 @@ public class rpgHorse {
         //if (this.originalArmor != 0) {
         //    updatedArmor = this.originalArmor * 1.5;
         //} else {
-            updatedArmor = 15;
+        updatedArmor = 15;
         //}
 
         //if (this.originalToughness != 0) {
         //    updatedToughness = this.originalToughness * 1.5;
         //} else {
-            updatedToughness = 15;
+        updatedToughness = 15;
         //}
         updatedHealth = this.originalHealth * 2;
         updatedKnockbackResist = this.originalKnockbackResist + 1;
@@ -93,7 +96,30 @@ public class rpgHorse {
         if (player.getInventory().contains(Material.SADDLE)) {
             player.getInventory().remove(Material.SADDLE);
             horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+            this.hasSaddle = true;
+        } else {
+            this.hasSaddle = false;
         }
+
+        if (player.getInventory().contains(Material.DIAMOND_BARDING)) {
+            this.hasArmour = true;
+            this.armourType = Material.DIAMOND_BARDING;
+            player.getInventory().remove(Material.DIAMOND_BARDING);
+            horse.getInventory().setArmor(new ItemStack(Material.DIAMOND_BARDING));
+        } else if (player.getInventory().contains(Material.GOLD_BARDING)) {
+            this.hasArmour = true;
+            this.armourType = Material.GOLD_BARDING;
+            player.getInventory().remove(Material.GOLD_BARDING);
+            horse.getInventory().setArmor(new ItemStack(Material.GOLD_BARDING));
+        } else if (player.getInventory().contains(Material.IRON_BARDING)) {
+            this.hasArmour = true;
+            this.armourType = Material.IRON_BARDING;
+            player.getInventory().remove(Material.IRON_BARDING);
+            horse.getInventory().setArmor(new ItemStack(Material.IRON_BARDING));
+        } else {
+            this.hasArmour = false;
+        }
+
     }
 
     public void summonHorse() {
@@ -102,11 +128,20 @@ public class rpgHorse {
         if (entityHorse instanceof Horse) {
             Horse horse = (Horse) entityHorse;
 
-            if ((horse).getInventory().getSaddle() != null) {
+            if (this.hasSaddle) {
                 player.getInventory().addItem(new ItemStack(Material.SADDLE));
                 horse.getInventory().setSaddle(null);
-
             }
+            if (this.hasArmour) {
+                player.getInventory().addItem(new ItemStack(this.armourType));
+                horse.getInventory().setArmor(null);
+            }
+
+            /*if ((horse).getInventory().getSaddle() != null) {
+                player.getInventory().addItem(new ItemStack(Material.SADDLE));
+                horse.getInventory().setSaddle(null);
+            }*/
+
             horse.remove();
             horse.setHealth(0);
 
@@ -116,11 +151,35 @@ public class rpgHorse {
 
             updateHorseStats(horse);
 
+        } else {
+            Horse horse = (Horse) player.getWorld().spawnEntity(player.getLocation(), EntityType.HORSE);
+            if (this.hasSaddle) {
+                player.getInventory().addItem(new ItemStack(Material.SADDLE));
+            }
+            if (this.hasArmour) {
+                player.getInventory().addItem(new ItemStack(this.armourType));
+            }
+            this.horseUUID = horse.getUniqueId();
+            updateHorseStats(horse);
         }
     }
 
     public void unsummon() {
-
+        Entity entityHorse = Bukkit.getEntity(this.horseUUID);
+        Player player = (Player) Bukkit.getEntity(this.playerUUID);
+        if (entityHorse instanceof Horse) {
+            Horse horse = (Horse) entityHorse;
+            if (this.hasSaddle) {
+                //player.getInventory().addItem(new ItemStack(Material.SADDLE));
+                horse.getInventory().setSaddle(null);
+            }
+            if (this.hasArmour) {
+                //player.getInventory().addItem(new ItemStack(this.armourType));
+                horse.getInventory().setArmor(null);
+            }
+            horse.remove();
+            horse.setHealth(0);
+        }
     }
 
     public void unclaim() {
@@ -131,8 +190,11 @@ public class rpgHorse {
                 Player player = (Player) Bukkit.getEntity(this.playerUUID);
                 player.getInventory().addItem(new ItemStack(Material.SADDLE));
             }
+            if (((Horse) entity).getInventory().getArmor() != null) {
+                Player player = (Player) Bukkit.getEntity(this.playerUUID);
+                player.getInventory().addItem(new ItemStack(((Horse) entity).getInventory().getArmor()));
+            }
         }
-
 
         this.horseUUID = null;
         this.originalToughness = 0;
@@ -150,6 +212,9 @@ public class rpgHorse {
         this.updatedKnockbackResist = 0;
         this.updatedSpeed = 0;
         this.updatedToughness = 0;
+        this.armourType = null;
+        this.hasArmour = false;
+        this.hasSaddle = false;
 
         System.gc();
     }

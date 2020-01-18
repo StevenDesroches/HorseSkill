@@ -1,7 +1,7 @@
 package com.github.StevenDesroches.HorseSkill.commands;
 
 import com.github.StevenDesroches.HorseSkill.HorseSkill;
-import com.github.StevenDesroches.HorseSkill.datatype.rpgHorse;
+import com.github.StevenDesroches.HorseSkill.datatype.RpgHorse;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,6 +16,11 @@ import java.util.UUID;
 public class HorseCommand implements CommandExecutor {
 
     private Map<UUID, Long> cdMap = new HashMap<>();
+    private HorseSkill horseSkill;
+
+    public HorseCommand(HorseSkill plugin) {
+        this.horseSkill = plugin;
+    }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
@@ -48,12 +53,12 @@ public class HorseCommand implements CommandExecutor {
                 Entity vehicle = player.getVehicle();
                 if (vehicle != null) {
                     if (vehicle instanceof Horse) {
-                        if (HorseSkill.getPlayerHorseList().containsKey(player.getUniqueId())) {
+                        if (horseSkill.getPlayerHorseList().containsKey(player.getUniqueId())) {
                             player.sendMessage("You Own A Horse");
                         } else {
                             Horse horse = (Horse) vehicle;
-                            HorseSkill.getPlayerHorseList().put(player.getUniqueId(), horse.getUniqueId());
-                            HorseSkill.getHorseList().put(horse.getUniqueId(), new rpgHorse(horse.getUniqueId(), player.getUniqueId()));
+                            horseSkill.getPlayerHorseList().put(player.getUniqueId(), horse.getUniqueId());
+                            horseSkill.getHorseList().put(horse.getUniqueId(), new RpgHorse(horse.getUniqueId(), player.getUniqueId()));
                             player.sendMessage("Success!");
                         }
                     } else {
@@ -77,11 +82,11 @@ public class HorseCommand implements CommandExecutor {
             Player player = (Player) commandSender;
 
             if (player.hasPermission("HorseSkill.commands.unclaim")) {
-                if (HorseSkill.getPlayerHorseList().containsKey(player.getUniqueId())) {
-                    UUID horseUUID = HorseSkill.getPlayerHorseList().get(player.getUniqueId());
-                    HorseSkill.getHorseList().get(horseUUID).unclaim();
-                    HorseSkill.getHorseList().remove(horseUUID);
-                    HorseSkill.getPlayerHorseList().remove(player.getUniqueId());
+                if (horseSkill.getPlayerHorseList().containsKey(player.getUniqueId())) {
+                    UUID horseUUID = horseSkill.getPlayerHorseList().get(player.getUniqueId());
+                    horseSkill.getHorseList().get(horseUUID).unclaim();
+                    horseSkill.getHorseList().remove(horseUUID);
+                    horseSkill.getPlayerHorseList().remove(player.getUniqueId());
                     player.sendMessage("Success!");
                 } else {
                     player.sendMessage("You Don't Own Any Horses");
@@ -101,21 +106,27 @@ public class HorseCommand implements CommandExecutor {
             Player player = (Player) commandSender;
 
             if (player.hasPermission("HorseSkill.commands.summon")) {
-                if (HorseSkill.getPlayerHorseList().containsKey(player.getUniqueId())) {
+                if (horseSkill.getPlayerHorseList().containsKey(player.getUniqueId())) {
                     if (this.cdMap.containsKey(player.getUniqueId())) {
-                        if ((System.currentTimeMillis() - this.cdMap.get(player.getUniqueId())) > 1800000) {
-                            UUID horseUUID = HorseSkill.getPlayerHorseList().get(player.getUniqueId());
-                            HorseSkill.getHorseList().get(horseUUID).summonHorse();
+                        if ((System.currentTimeMillis() - this.cdMap.get(player.getUniqueId())) > 300000) {
+                            UUID horseUUID = horseSkill.getPlayerHorseList().get(player.getUniqueId());
+                            horseSkill.getHorseList().get(horseUUID).summonHorse();
+
+                            RpgHorse rpgHorse = horseSkill.getHorseList().get(horseUUID);
+                            horseSkill.getHorseList().remove(horseUUID);
+                            horseSkill.getHorseList().put(rpgHorse.getHorseUUID(), rpgHorse);
+                            horseSkill.getPlayerHorseList().put(player.getUniqueId(), rpgHorse.getHorseUUID());
+
                             player.sendMessage("Success!");
                             this.cdMap.put(player.getUniqueId(), System.currentTimeMillis());
                         } else {
-                            long milliseconds = (System.currentTimeMillis() - this.cdMap.get(player.getUniqueId()));
+                            long milliseconds = (300000 + (this.cdMap.get(player.getUniqueId()) - System.currentTimeMillis()));
                             player.sendMessage("Command On Cooldown");
-                            player.sendMessage("Cooldown : " + (milliseconds / 1000) + " seconds");
+                            player.sendMessage("Cooldown : " + (milliseconds / 1000) + " Seconds");
                         }
                     } else {
-                        UUID horseUUID = HorseSkill.getPlayerHorseList().get(player.getUniqueId());
-                        HorseSkill.getHorseList().get(horseUUID).summonHorse();
+                        UUID horseUUID = horseSkill.getPlayerHorseList().get(player.getUniqueId());
+                        horseSkill.getHorseList().get(horseUUID).summonHorse();
                         player.sendMessage("Success!");
                         this.cdMap.put(player.getUniqueId(), System.currentTimeMillis());
                     }
