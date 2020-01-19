@@ -109,26 +109,14 @@ public class HorseCommand implements CommandExecutor {
                 if (horseSkill.getPlayerHorseList().containsKey(player.getUniqueId())) {
                     if (this.cdMap.containsKey(player.getUniqueId())) {
                         if ((System.currentTimeMillis() - this.cdMap.get(player.getUniqueId())) > 300000) {
-                            UUID horseUUID = horseSkill.getPlayerHorseList().get(player.getUniqueId());
-                            horseSkill.getHorseList().get(horseUUID).summonHorse();
-
-                            RpgHorse rpgHorse = horseSkill.getHorseList().get(horseUUID);
-                            horseSkill.getHorseList().remove(horseUUID);
-                            horseSkill.getHorseList().put(rpgHorse.getHorseUUID(), rpgHorse);
-                            horseSkill.getPlayerHorseList().put(player.getUniqueId(), rpgHorse.getHorseUUID());
-
-                            player.sendMessage("Success!");
-                            this.cdMap.put(player.getUniqueId(), System.currentTimeMillis());
+                            summonHorseMethod(player);
                         } else {
                             long milliseconds = (300000 + (this.cdMap.get(player.getUniqueId()) - System.currentTimeMillis()));
                             player.sendMessage("Command On Cooldown");
                             player.sendMessage("Cooldown : " + (milliseconds / 1000) + " Seconds");
                         }
                     } else {
-                        UUID horseUUID = horseSkill.getPlayerHorseList().get(player.getUniqueId());
-                        horseSkill.getHorseList().get(horseUUID).summonHorse();
-                        player.sendMessage("Success!");
-                        this.cdMap.put(player.getUniqueId(), System.currentTimeMillis());
+                        summonHorseMethod(player);
                     }
                 } else {
                     player.sendMessage("You Don't Own A Horse");
@@ -140,5 +128,18 @@ public class HorseCommand implements CommandExecutor {
             commandSender.sendMessage("Console can't use this command");
         }
         return true;
+    }
+
+    private void summonHorseMethod(Player player) {
+        UUID horseUUID = horseSkill.getPlayerHorseList().get(player.getUniqueId());
+        horseSkill.getHorseList().get(horseUUID).summonHorse();
+        RpgHorse rpgHorse = horseSkill.getHorseList().get(horseUUID);
+
+        horseSkill.getHorseList().remove(horseUUID);
+        horseSkill.getHorseList().put(rpgHorse.getHorseUUID(), rpgHorse);
+        horseSkill.getPlayerHorseList().put(player.getUniqueId(), rpgHorse.getHorseUUID());
+
+        player.sendMessage("Success!");
+        this.cdMap.put(player.getUniqueId(), System.currentTimeMillis());
     }
 }

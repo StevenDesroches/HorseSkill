@@ -1,5 +1,5 @@
 name: HorseSkill
-version: 1.1.0
+version: 1.5.0
 author: stecool
 main: com.github.StevenDesroches.HorseSkill.HorseSkill
 api-version: 1.12.2
@@ -10,30 +10,30 @@ commands:
 permissions:
   HorseSkill.*:
     description: Gives access to everything
-    default: true
+    default: false
     children:
       HorseSkill.commands.*: true
       HorseSkill.load: true
       HorseSkill.save: true
   HorseSkill.commands.*:
     description: Gives access to all the commands
-    default: true
+    default: false
     children:
       HorseSkill.commands.claim: true
       HorseSkill.commands.unclaim: true
       HorseSkill.commands.summon: true
   HorseSkill.commands.claim:
     description: Gives the claim command
-    default: true
+    default: false
   HorseSkill.commands.unclaim:
     description: Gives the unclaim command
-    default: true
+    default: false
   HorseSkill.commands.summon:
     description: Gives the summon command
-    default: true
+    default: false
   HorseSkill.load:
     description: Do player load his horse
-    default: true
+    default: false
   HorseSkill.save:
     description: Do player save his horse
-    default: true
+    default: false

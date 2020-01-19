@@ -1,5 +1,8 @@
 package com.github.StevenDesroches.HorseSkill.datatype;
 
+import com.github.StevenDesroches.HorseSkill.HorseSkill;
+import com.gmail.nossr50.api.ExperienceAPI;
+import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -60,7 +63,26 @@ public class RpgHorse {
 
 
     private void createUpdatedStats() {
-        updatedSpeed = this.originalSpeed * 1.5;
+        Player player = (Player) Bukkit.getEntity(this.playerUUID);
+
+        double speedMulti = 1.0;
+        double healthMulti = 1.0;
+        double jumpMulti = 1.0;
+
+        if (HorseSkill.hasmcMMO) {
+            int tamingLevel = ExperienceAPI.getLevel(player, "TAMING");
+            if (tamingLevel == 0) {
+                tamingLevel = 1;
+            }
+            if (tamingLevel > 1000) {
+                tamingLevel = 1000;
+            }
+            speedMulti = (tamingLevel / 1000.0);
+            healthMulti = (tamingLevel / 1000.0);
+            jumpMulti = (tamingLevel / 1000.0);
+        }
+
+        updatedSpeed = this.originalSpeed + (this.originalSpeed * speedMulti);
         //if (this.originalArmor != 0) {
         //    updatedArmor = this.originalArmor * 1.5;
         //} else {
@@ -72,9 +94,9 @@ public class RpgHorse {
         //} else {
         updatedToughness = 15;
         //}
-        updatedHealth = this.originalHealth * 2;
+        updatedHealth = this.originalHealth + (this.originalHealth * healthMulti);
         updatedKnockbackResist = this.originalKnockbackResist + 1;
-        updatedJump = this.originalJump * 1.5;
+        updatedJump = this.originalJump + (this.originalJump * jumpMulti);
     }
 
     private void updateHorseStats(Horse horse) {

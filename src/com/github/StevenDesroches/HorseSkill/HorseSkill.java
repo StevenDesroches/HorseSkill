@@ -5,6 +5,7 @@ import com.github.StevenDesroches.HorseSkill.datatype.RpgHorse;
 import com.github.StevenDesroches.HorseSkill.datatype.RpgHorseSerializationManager;
 import com.github.StevenDesroches.HorseSkill.listener.EntityListener;
 import com.github.StevenDesroches.HorseSkill.listener.PlayerListener;
+import com.gmail.nossr50.api.ExperienceAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 public class HorseSkill extends JavaPlugin {
     public static HorseSkill instance;
+    public static boolean hasmcMMO = false;
     private Map<UUID, RpgHorse> horseList;
     private Map<UUID, UUID> playerHorseList;
     private RpgHorseSerializationManager rpgHorseSerializationManager;
@@ -40,7 +42,11 @@ public class HorseSkill extends JavaPlugin {
         playerHorseList = new HashMap<>();
         rpgHorseSerializationManager = new RpgHorseSerializationManager();
 
-        this.getServer().getPluginManager().registerEvents(new EntityListener(), this);
+        if(getServer().getPluginManager().getPlugin("mcMMO").isEnabled()){
+            hasmcMMO = true;
+        }
+
+        this.getServer().getPluginManager().registerEvents(new EntityListener(instance), this);
         this.getServer().getPluginManager().registerEvents(new PlayerListener(instance), this);
         this.getCommand("horse").setExecutor(new HorseCommand(instance));
         Bukkit.getConsoleSender().sendMessage("[HorseSkill] onEnable");
